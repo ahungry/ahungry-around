@@ -1,6 +1,6 @@
 {
   "name": "ahungry-around",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wrap every class method in a project with a custom proxy handler.",
   "main": "index.js",
   "author": "Matthew Carter",
