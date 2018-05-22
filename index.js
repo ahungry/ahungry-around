@@ -7,6 +7,7 @@ class AhungryAround {
   constructor (handler, desc) {
     this.handler = handler
     this.desc = desc
+    this.seenIds = []
 
     // Ensure all maps/callbacks work with proper binding.
     this.handleModule = this.handleModule.bind(this)
@@ -25,7 +26,7 @@ class AhungryAround {
 
     const props = Object.getOwnPropertyNames(classDef)
 
-    return props.filter(key => ['length', 'prototype', 'name'].indexOf(key) === -1)
+    return props.filter(key => ['arguments', 'length', 'prototype', 'name'].indexOf(key) === -1)
   }
 
   // Pull all props, bind the handler to it.
@@ -42,11 +43,15 @@ class AhungryAround {
     const protoProps = ClassDef && ClassDef.prototype ? this.getProps(ClassDef.prototype) || [] : []
 
     props.map(prop => {
+      if (typeof ClassDef[prop] !== 'object' || ClassDef[prop] === null) return
+
       const proxy = new Proxy(ClassDef[prop], this.handler)
       ClassDef[prop] = proxy
     })
 
     protoProps.map(prop => {
+      if (typeof ClassDef.prototype[prop] !== 'object' || ClassDef.prototype[prop] === null) return
+
       const proxy = new Proxy(ClassDef.prototype[prop], this.handler)
       ClassDef.prototype[prop] = proxy
     })
@@ -57,6 +62,10 @@ class AhungryAround {
   // Pull all the modules we use, and bind the handlers.
   handleModuleChildren (child) {
     if (/node_modules/.test(child.id)) return
+
+    if (this.seenIds.indexOf(child.id) > -1) return
+
+    this.seenIds.push(child.id)
 
     // Recurse into their children as well.
     child.children.map(this.handleModuleChildren)
