@@ -1,20 +1,23 @@
+// Keep a global reference of all things we've already bound, to avoid duplicates.
+const handlerMap = {}
+
 // Bind a handler to everything possible.
 class AhungryAround {
-  // module should be a nodejs module object.
   // handler should be an appropriate Proxy handler.
-  constructor (module, handler) {
-    this.module = module
+  constructor (handler, desc) {
     this.handler = handler
+    this.desc = desc
 
     // Ensure all maps/callbacks work with proper binding.
-    this.init = this.init.bind(this)
+    this.handleModule = this.handleModule.bind(this)
     this.getProps = this.getProps.bind(this)
-    this.handleAll = this.handleAll.bind(this)
+    this.handleObjectOrFn = this.handleObjectOrFn.bind(this)
     this.handleModuleChildren = this.handleModuleChildren.bind(this)
   }
 
-  init () {
-    this.module.children.map(this.handleModuleChildren)
+  // module should be a nodejs module object.
+  handleModule (module) {
+    module.children.map(this.handleModuleChildren)
   }
 
   getProps (classDef) {
@@ -26,9 +29,17 @@ class AhungryAround {
   }
 
   // Pull all props, bind the handler to it.
-  handleAll (ClassDef) {
+  handleObjectOrFn (ClassDef) {
+    // See if we've already worked on this or not.
+    const mapKey = this.desc + ClassDef.name
+    if (handlerMap[mapKey] !== undefined) {
+      return
+    }
+
+    handlerMap[mapKey] = true
+
     const props = this.getProps(ClassDef) || []
-    const protoProps = this.getProps(ClassDef.prototype) || []
+    const protoProps = ClassDef && ClassDef.prototype ? this.getProps(ClassDef.prototype) || [] : []
 
     props.map(prop => {
       const proxy = new Proxy(ClassDef[prop], this.handler)
@@ -53,11 +64,11 @@ class AhungryAround {
     const exports = child.exports
 
     if (typeof exports === 'function') {
-      this.handleAll(exports)
+      this.handleObjectOrFn(exports)
     }
 
     if (typeof exports === 'object') {
-      Object.keys(exports).map(key => this.handleAll(exports[key]))
+      Object.keys(exports).map(key => this.handleObjectOrFn(exports[key]))
     }
   }
 }
