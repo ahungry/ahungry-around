@@ -1,15 +1,15 @@
 const { AhungryAround } = require('../index')
 const { HelloWorld } = require('./HelloWorld')
 
+let iter = 0
+
 const handler = {
   apply: (target, thisArg, argumentsList) => {
+    // A sample useful key value.
     const key = `${target.name} ${JSON.stringify(argumentsList)}`
 
-    console.log('Begin: ', key)
-
+    console.log('This is the nth time calling handler:', ++iter)
     const result = target.apply(thisArg, argumentsList)
-
-    console.log('End: ', key)
 
     return result
   }
@@ -20,4 +20,6 @@ aa.init()
 
 const hw = new HelloWorld()
 hw.flub('Greetings')
-HelloWorld.blub('Salutations')
+HelloWorld.blub()
+
+if (iter !== 4) throw new Error('Test failure!' + iter)

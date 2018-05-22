@@ -5,5 +5,8 @@
   "main": "index.js",
   "author": "Matthew Carter",
   "license": "GPL-3.0-with-autoconf-exception",
-  "private": false
+  "private": false,
+  "scripts": {
+    "test": "node ./tests/test.js"
+  }
 }
