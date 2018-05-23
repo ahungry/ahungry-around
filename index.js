@@ -43,15 +43,11 @@ class AhungryAround {
     const protoProps = ClassDef && ClassDef.prototype ? this.getProps(ClassDef.prototype) || [] : []
 
     props.map(prop => {
-      if (typeof ClassDef[prop] !== 'object' || ClassDef[prop] === null) return
-
       const proxy = new Proxy(ClassDef[prop], this.handler)
       ClassDef[prop] = proxy
     })
 
     protoProps.map(prop => {
-      if (typeof ClassDef.prototype[prop] !== 'object' || ClassDef.prototype[prop] === null) return
-
       const proxy = new Proxy(ClassDef.prototype[prop], this.handler)
       ClassDef.prototype[prop] = proxy
     })
