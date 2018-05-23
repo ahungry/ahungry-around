@@ -5,9 +5,17 @@ const myPrinter = new Printer()
 const printer = myPrinter.log.bind(myPrinter)
 
 class HelloWorld {
+  get myVar () {
+    return this._myVar + 1
+  }
+
   static blub () {
     printer('blub')
     myPrinter.log('blub')
+  }
+
+  constructor () {
+    this._myVar = 3
   }
 
   flub (msg) {
